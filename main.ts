@@ -124,7 +124,7 @@ class MemorySwapFileManager {
             const freeOutput = await execAsync("df -k /swapFolder | tail -1 | awk '{print $4}'");
             const free = parseInt(freeOutput.trim(), 10);
             const diskSpace = parseInt(free.toString(), 10) * 1024; // KBからバイトに変換
-            if (diskSpace < 1.2 * 1024 * 1024 * 1024) { // 空き容量が1.2GB未満の場合の処理
+            if (diskSpace < 2 * 1024 * 1024 * 1024) { // 空き容量が2GB未満の場合の処理
                 console.warn("空き容量が不足しているため、スワップファイルを開放します。");
                 const swapStatus = await swapStatusGet();
                 const memoryStatus = await memoryStatusGet();
@@ -139,7 +139,7 @@ class MemorySwapFileManager {
                 if (largestSwapFile && memoryStatus.Swap.free >= largestSwapFile.used) {
                     await this.swapFile.release(largestSwapFile.name.replace("/swapFolder/", ""));
                 } else {
-                    console.warn("【警告！！】メモリが不足し、スワップファイルを開放できません。ディスクの状態や、アプリの状態を確認してください。");
+                    console.warn("【警告！！】メモリ・ディスク領域が不足し、スワップファイルを開放できません。ディスクの状態や、アプリの状態を確認してください。");
                     return;
                 }
             }
