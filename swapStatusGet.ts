@@ -18,7 +18,9 @@ export async function swapStatusGet(): Promise<{
 }[] | undefined> {
     try {
         const output = await execAsync("swapon --show --bytes");
-        const lines = output.split("\n").slice(1); // ヘッダー行をスキップ
+        const lines = output.split("\n");
+        if (lines.length < 2) return [];
+        lines.shift(); // ヘッダ行を削除
         const swapStatus = lines.map(line => {
             const [name, type, size, used, prio] = line.trim().split(/\s+/);
             return {
@@ -29,8 +31,8 @@ export async function swapStatusGet(): Promise<{
                 prio: parseInt(prio),
             };
         }).filter(entry => entry.name); // 空行を除外
-        return swapStatus.length > 0 ? swapStatus : undefined;
-    } catch {
-        return undefined;
+        return swapStatus.length > 0 ? swapStatus : [];
+    } catch (e) {
+        throw e;
     }
 }

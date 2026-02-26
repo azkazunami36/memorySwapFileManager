@@ -4,7 +4,7 @@ import { execAsync } from "./execAsync.js";
  * メモリとスワップのステータスを取得します。
  * @returns メモリとスワップのステータスを含むオブジェクト、またはエラーが発生した場合は undefined を返します。
  */
-export async function memoryStatusGet(): Promise<{
+export interface MemoryStatus {
     /** メモリのステータス */
     Mem: {
         /** 総メモリ量 (MB) */
@@ -29,24 +29,26 @@ export async function memoryStatusGet(): Promise<{
         /** 空きスワップ量 (MB) */
         free: number;
     };
-} | undefined> {
+}
+
+export async function memoryStatusGet(): Promise<MemoryStatus | undefined> {
     try {
-        const o = (await execAsync("free")).split("\n").map(l => l.trim().split(/\s+/));
-        const t = (v: string) => parseInt(v) / 1000;
+        const o = (await execAsync("free --si")).split("\n").map(l => l.trim().split(/\s+/));
+        const t = (v: string) => parseInt(v) / 1024;
         let m: any, s: any;
         o.forEach(l => {
             if (l[0] === "Mem:" && l.length >= 7) {
                 const p = { total: t(l[1]), used: t(l[2]), free: t(l[3]), shared: t(l[4]), buff_cache: t(l[5]), available: t(l[6]), };
-                if (Object.values(p).some(v => isNaN(v))) return undefined;
+                if (Object.values(p).some(v => isNaN(v))) throw new Error("Invalid value: " + JSON.stringify(p) + " in " + JSON.stringify(l));
                 m = p;
             } else if (l[0] === "Swap:" && l.length >= 4) {
                 const p = { total: t(l[1]), used: t(l[2]), free: t(l[3]), };
-                if (Object.values(p).some(v => isNaN(v))) return undefined;
+                if (Object.values(p).some(v => isNaN(v))) throw new Error("Invalid value: " + JSON.stringify(p) + " in " + JSON.stringify(l));
                 s = p;
             }
         });
-        return m && s ? { Mem: m, Swap: s } : undefined;
-    } catch {
-        return undefined;
+        return { Mem: m, Swap: s };
+    } catch (e) {
+        throw e;
     }
 }

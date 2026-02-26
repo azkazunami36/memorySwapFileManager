@@ -3,5 +3,9 @@
   "devDependencies": {
     "@types/node": "^22.10.2",
     "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "log4js": "^6.9.1"
   }
 }
