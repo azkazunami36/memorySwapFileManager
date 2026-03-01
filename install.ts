@@ -1,42 +1,55 @@
 import fs from "fs";
+import readline from "readline";
 
 import { memoryStatusGet } from "./memoryStatusGet.js";
 import { execAsync } from "./execAsync.js";
 import { swapStatusGet } from "./swapStatusGet.js";
 
-console.log("メモリスワップファイルマネージャーのインストールを開始します。");
-
-// アクセス先の権限が全て有しているかをチェックします。
-
-try {
-    if (!fs.existsSync("/etc/systemd/system")) {
-        console.log("'/etc/systemd/system'にアクセスできません。フォルダが存在しません。systemdが利用できない可能性があります。インストールに失敗しました。");
-        process.exit(1);
-    }
-    fs.accessSync("/etc/systemd/system", fs.constants.W_OK);
-} catch {
-    console.log("'/etc/systemd/system'にアクセスできません。権限が不足しています。インストールに失敗しました。");
-    process.exit(1);
-}
-const cwd = process.cwd();
-try {
-    if (!fs.existsSync(cwd + "/main.js")) {
-        console.log("'" + cwd + "/main.js'にアクセスできません。ファイルが存在しません。インストールに失敗しました。");
-        process.exit(1);
-    }
-    fs.accessSync(cwd + "/main.js", fs.constants.W_OK);
-} catch {
-    console.log("'" + cwd + "/main.js'にアクセスできません。権限が不足しています。インストールに失敗しました。");
-    process.exit(1);
-}
-
-try {
-    if (!fs.existsSync("/swapFolder")) fs.mkdirSync("/swapFolder");
-} catch {
-    console.log("スワップファイルを保存するためのフォルダ'swapFolder'をルートに配置しようとしましたが、エラーが発生しました。インストールに失敗しました。")
+async function question(text: string): Promise<string> {
+    const iface = readline.createInterface({ input: process.stdin, output: process.stdout })
+    return await new Promise(resolve => iface.question(text + "> ", answer => { iface.close(); resolve(answer) }))
 }
 
 (async () => {
+    console.log("メモリスワップファイルマネージャーのインストーラーが起動しています。");
+    console.log("この操作を続行するとシステムに操作が加えられます。注意事項を理解した上で続行してください。");
+    const agree = await question("メモリスワップファイルマネージャーのインストールを実行してもよろしいですか？(y/n)");
+    if (agree.toLowerCase() !== "y" && agree.toLowerCase() !== "yes") {
+        console.log("操作は中断されました。");
+        process.exit(0);
+    }
+    console.log("メモリスワップファイルマネージャーのインストールを開始します。");
+
+    // アクセス先の権限が全て有しているかをチェックします。
+
+    try {
+        if (!fs.existsSync("/etc/systemd/system")) {
+            console.log("'/etc/systemd/system'にアクセスできません。フォルダが存在しません。systemdが利用できない可能性があります。インストールに失敗しました。");
+            process.exit(1);
+        }
+        fs.accessSync("/etc/systemd/system", fs.constants.W_OK);
+    } catch {
+        console.log("'/etc/systemd/system'にアクセスできません。権限が不足しています。インストールに失敗しました。");
+        process.exit(1);
+    }
+    const cwd = process.cwd();
+    try {
+        if (!fs.existsSync(cwd + "/main.js")) {
+            console.log("'" + cwd + "/main.js'にアクセスできません。ファイルが存在しません。インストールに失敗しました。");
+            process.exit(1);
+        }
+        fs.accessSync(cwd + "/main.js", fs.constants.W_OK);
+    } catch {
+        console.log("'" + cwd + "/main.js'にアクセスできません。権限が不足しています。インストールに失敗しました。");
+        process.exit(1);
+    }
+
+    try {
+        if (!fs.existsSync("/swapFolder")) fs.mkdirSync("/swapFolder");
+    } catch {
+        console.log("スワップファイルを保存するためのフォルダ'swapFolder'をルートに配置しようとしましたが、エラーが発生しました。インストールに失敗しました。")
+    }
+
     try {
         const status = await memoryStatusGet();
         if (!status) throw "";

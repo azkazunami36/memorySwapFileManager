@@ -1,7 +1,7 @@
 {
   "type": "module",
   "devDependencies": {
-    "@types/node": "^22.10.2",
+    "@types/node": "^22.19.13",
     "typescript": "^5.2.2"
   },
   "dependencies": {
@@ -9,7 +9,8 @@
     "log4js": "^6.9.1"
   },
   "scripts": {
-    "install": "npx tsc && node install",
-    "start": "node main.js"
+    "install": "npx tsc && sudo node install",
+    "start": "node main.js",
+    "uninstall": "npx tsc && sudo node uninstall"
   }
 }
