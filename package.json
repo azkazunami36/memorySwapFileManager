@@ -7,5 +7,9 @@
   "dependencies": {
     "express": "^4.21.2",
     "log4js": "^6.9.1"
+  },
+  "scripts": {
+    "install": "npx tsc && node install",
+    "start": "node main.js"
   }
 }

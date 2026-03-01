@@ -126,8 +126,8 @@ class MemorySwapFileManager {
         // 不正なスワップファイルを削除
         for (const file of invalidSwapFiles) {
             consol.info("規格外のスワップファイルを削除します。: " + file);
-            await execAsync("sudo swapoff " + file);
-            await execAsync("sudo rm " + file);
+            await execAsync("swapoff " + file);
+            await execAsync("rm " + file);
         }
 
         // メモリの状況を一定間隔で監視
@@ -170,7 +170,7 @@ class MemorySwapFileManager {
                         await this.swapFile.create(newFileName);
                         await this.swapFile.activate(newFileName);
                     }
-                    await execAsync("sudo swapoff /swapFolder/" + filename);
+                    await execAsync("swapoff /swapFolder/" + filename);
                 }
             } catch (e) {
                 consol.error("スワップファイルの開放に失敗しました。エラー理由: " + e);
@@ -219,9 +219,10 @@ class MemorySwapFileManager {
 
             // 新しいスワップファイルを作成
             try {
-                await execAsync("sudo fallocate -l 1000000000 /swapFolder/" + fileName);
-                await execAsync("sudo chmod 600 /swapFolder/" + fileName);
-                await execAsync("sudo mkswap /swapFolder/" + fileName);
+                await execAsync("fallocate -l 1000000000 /swapFolder/" + fileName);
+                await execAsync("chmod 600 /swapFolder/" + fileName);
+                await execAsync("mkswap /swapFolder/" + fileName);
+                console.log("作成結果: " + fs.existsSync("/swapFolder/" + fileName));
             } catch (e) {
                 consol.error("スワップファイルの作成に失敗しました。エラー理由: " + e);
             }
@@ -235,7 +236,7 @@ class MemorySwapFileManager {
             try {
                 const swapStatus = await swapStatusGet();
                 if (swapStatus && !swapStatus.some(swap => swap.name === "/swapFolder/" + fileName))
-                    await execAsync("sudo swapon /swapFolder/" + fileName);
+                    await execAsync("swapon /swapFolder/" + fileName);
             } catch (e) {
                 consol.error("スワップファイルの有効化に失敗しました。エラー理由: " + e);
             }
@@ -284,7 +285,7 @@ class MemorySwapFileManager {
                     if (swapStatus && !swapStatus.some(swap => swap.name === filePath) || fs.lstatSync(filePath).isDirectory()) {
                         consol.info("次の不要なスワップファイルを削除します。: " + filePath);
                         try {
-                            await execAsync("sudo rm -r " + filePath);
+                            await execAsync("rm -r " + filePath);
                         } catch (e) {
                             consol.error("スワップファイルの削除に失敗しました。エラー理由: " + e);
                         }
