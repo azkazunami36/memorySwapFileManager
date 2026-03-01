@@ -26,7 +26,7 @@ MemorySwapFileManagerは、Ubuntu OSのメモリの状況を監視し、スワ�
 ### インストール
 1. このリポジトリをクローンします。
     ```sh
-    git clone https://github.com/yourusername/memorySwapFileManager.git
+    git clone https://github.com/azkazunami36/memorySwapFileManager.git
     ```
 2. 必要な依存関係をインストールします(インストールも行われます)。実行の際はsudo・root権限を利用してください。
     ```sh
